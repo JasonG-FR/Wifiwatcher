@@ -133,7 +133,7 @@ def main(args):
             print("Attente d'une connection Ethernet...")
             nonConnecte = True
             while nonConnecte:
-                eth0 = subprocess.check_output(["ifconfig wlp3s0"], shell=True).decode("utf8")
+                eth0 = subprocess.check_output(["ifconfig wlan0"], shell=True).decode("utf8")
                 #Si eth0 à une IP, alors on est connecté
                 if "inet" in eth0:
                     nonConnecte = False

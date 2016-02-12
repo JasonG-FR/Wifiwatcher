@@ -25,9 +25,9 @@
 import subprocess
 import time
 
-def mettreAJour(user,nomPkg,log):
+def mettreAJour(user,nomPkg,log,repoAUR):
     subprocess.run(["sudo -u " + user + " mkdir tmp"], shell=True)
-    subprocess.run(["cd tmp && sudo -u " + user + " yaourt -G " + nomPkg], shell=True)
+    subprocess.run(["cd tmp && sudo -u " + user + " git clone " + repoAUR], shell=True)
     
     PKGBUILD_local = open(nomPkg + "/PKGBUILD","r")
     PKGBUILD_internet = open("tmp/" + nomPkg + "/PKGBUILD","r")
@@ -60,8 +60,8 @@ def mettreAJour(user,nomPkg,log):
 def installPkg(nomPkg):
     subprocess.check_output(["pacman -U --noconfirm " + nomPkg], shell=True)
 
-def buildPkg(user,nomPkg):
-    subprocess.run(["sudo -u " + user + " yaourt -G " + nomPkg], shell=True)
+def buildPkg(user,nomPkg,repoAUR):
+    subprocess.run(["sudo -u " + user + " git clone " + repoAUR], shell=True)
     subprocess.run(["cd " + nomPkg + " && sudo -u " + user + " makepkg -c"], shell=True)
     
     return subprocess.check_output(["ls " + nomPkg + "/*.pkg.tar.xz"], shell=True).decode("utf8")
@@ -81,6 +81,7 @@ def main(args):
     interface_secours = "eth0"
     user = "oracle"
     nomPkg = "8188eu-dkms"
+    repoAUR = "https://aur.archlinux.org/8188eu-dkms.git"
     
     log = open("logs/Wifiwatcher.log","a")
     
@@ -116,7 +117,7 @@ def main(args):
             log.write("Il existe un package local, est-il à jour ?\n")
             log.flush()
             #Vérifier qu'il est à jour
-            if mettreAJour(user,nomPkg,log):
+            if mettreAJour(user,nomPkg,log,repoAUR):
                 #On sauvegarde l'ancien package (on sait jamais...)
                 log.write("Sauvegarde ancien package\n")
                 log.flush()

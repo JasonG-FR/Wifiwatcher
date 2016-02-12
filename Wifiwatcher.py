@@ -46,15 +46,12 @@ def mettreAJour(user,nomPkg,log,repoAUR):
     PKGBUILD_internet.close()
     subprocess.check_output(["rm -r tmp"], shell=True)
     
-    log.write("Version de " + nomPkg + " : [dépôt] " + versionInternet.replace("pkgver=","").replace("\n","") + " | [local] " + versionLocale.replace("pkgver=","").replace("\n","") + "\n")
-    log.flush()
+    log.write("Version de " + nomPkg + " : [dépôt] " + versionInternet.replace("pkgver=","").replace("\n","") + " | [local] " + versionLocale.replace("pkgver=","").replace("\n","") + "\n").flush()
     if versionInternet == versionLocale:
-        log.write("Le package local est à jour!\n")
-        log.flush()
+        log.write("Le package local est à jour!\n").flush()
         return False
     else:
-        log.write("Le package local doit être mis à jour!\n")
-        log.flush()
+        log.write("Le package local doit être mis à jour!\n").flush()
         return True
 
 def installPkg(nomPkg):
@@ -85,78 +82,64 @@ def main(args):
     
     log = open("logs/Wifiwatcher.log","a")
     
-    log.write("\n\t---- Wifiwatcher ----\n")
-    log.flush()
+    log.write("\n\t---- Wifiwatcher ----\n").flush()
     #On affiche la date (logs)
     date = subprocess.check_output(["date"], shell=True).decode("utf8")
-    log.write(date)
-    log.flush()
+    log.write(date).flush()
     
     #On vérifie qu'on est root
     
     whoami = subprocess.check_output(["whoami"], shell=True)
     if whoami != b'root\n':
-        log.write("Wifiwatcher a besoin d'être lancé en tant que root ! (lancé avec "+ whoami.decode("utf8") +")\n")
-        log.flush()
+        log.write("Wifiwatcher a besoin d'être lancé en tant que root ! (lancé avec "+ whoami.decode("utf8") +")\n").flush()
         return 1
     
     #On vérifie si la carte Wifi est reconnue
     try:
         subprocess.check_output(["ifconfig " + interface], shell=True)
-        log.write(interface + " connectée !\n")
-        log.flush()
+        log.write(interface + " connectée !\n").flush()
         interface_OK = True
     except subprocess.CalledProcessError:
-        log.write(interface + " non connectée !\n")
-        log.flush()
+        log.write(interface + " non connectée !\n").flush()
         interface_OK = False
     
     if interface_OK:
         #Vérifier que le package existe (*.pkg.tar.xz)
         if pkgExiste(nomPkg):
-            log.write("Il existe un package local, est-il à jour ?\n")
-            log.flush()
+            log.write("Il existe un package local, est-il à jour ?\n").flush()
             #Vérifier qu'il est à jour
             if mettreAJour(user,nomPkg,log,repoAUR):
                 #On sauvegarde l'ancien package (on sait jamais...)
-                log.write("Sauvegarde ancien package\n")
-                log.flush()
+                log.write("Sauvegarde ancien package\n").flush()
                 subprocess.check_output(["mv " + nomPkg + "/ " + nomPkg + "-old/"], shell=True)
                 #Téléchargement et compilation du package
-                log.write("Téléchargement et compilation du package\n")
-                log.flush()
-                nom = buildPkg(user,nomPkg)
+                log.write("Téléchargement et compilation du package\n").flush()
+                nom = buildPkg(user,nomPkg,repoAUR)
                 #Installation du package
-                log.write("Installation du package\n")
-                log.flush()
+                log.write("Installation du package\n").flush()
                 installPkg(nom)
                             
         #Sinon on télécharge et compile le dernier
         else:
             #Téléchargement et compilation du package
-            log.write("Téléchargement et compilation du package\n")
-            log.flush()
-            nom = buildPkg(user,nomPkg)
+            log.write("Téléchargement et compilation du package\n").flush()
+            nom = buildPkg(user,nomPkg,repoAUR)
             #Installation du package
-            log.write("Installation du package\n")
-            log.flush()
+            log.write("Installation du package\n").flush()
             installPkg(nom)
 
     else:
         if pkgExiste(nomPkg):
             #Installer le package disponible
-            log.write("Installation du package\n")
-            log.flush()
+            log.write("Installation du package\n").flush()
             nom = subprocess.check_output(["ls " + nomPkg + "/*.pkg.tar.xz"], shell=True).decode("utf8")
             installPkg(nom)
             
         else:
-            log.write("La carte Wifi est désactivée et aucun package de " + nomPkg + " disponible localement...\n")
-            log.flush()
+            log.write("La carte Wifi est désactivée et aucun package de " + nomPkg + " disponible localement...\n").flush()
             #Pas de Wifi ni de package disponible, on peut rien faire... sauf si on a un accès Ethernet !
             #Attente d'une connection Ethernet...
-            log.write("Attente d'une connection Ethernet...\n")
-            log.flush()
+            log.write("Attente d'une connection Ethernet...\n").flush()
             nonConnecte = True
             while nonConnecte:
                 if_sec = subprocess.check_output(["ifconfig " + interface_secours], shell=True).decode("utf8")
@@ -164,21 +147,17 @@ def main(args):
                 if "inet" in if_sec:
                     nonConnecte = False
                 time.sleep(5)
-            log.write(interface_secours + " connectée !\n")
-            log.flush()
+            log.write(interface_secours + " connectée !\n").flush()
             #Téléchargement et compilation du package
-            log.write("Téléchargement et compilation du package\n")
-            log.flush()
-            nom = buildPkg(user,nomPkg)
+            log.write("Téléchargement et compilation du package\n").flush()
+            nom = buildPkg(user,nomPkg,repoAUR)
             #Installation du package
-            log.write("Installation du package\n")
-            log.flush()
+            log.write("Installation du package\n").flush()
             installPkg(nom)
             
         #Redémarrer système dans 1 minute (pour pouvoir quitter le script et sauvegarder les logs!)
         subprocess.run(["shutdown -r +1 'Redémarrage système imminent pour réactivation du Wifi...'"], shell=True)
-        log.write("---- Reboot ----\n")
-        log.flush()
+        log.write("---- Reboot ----\n").flush()
         log.close()
             
     return 0

@@ -27,10 +27,10 @@ import subprocess
 def installPkg(nomPkg):
     subprocess.check_output(["pacman -U " + nomPkg], shell=True)
 
-def buildPkg():
-    subprocess.check_output(["sudo -u oracle yaourt -G 8188eu-dkms"], shell=True)
+def buildPkg(user):
+    subprocess.check_output(["sudo -u " + user + " yaourt -G 8188eu-dkms"], shell=True)
     subprocess.check_output(["cd 8188eu-dkms"], shell=True)
-    subprocess.check_output(["sudo -u oracle makepkg -c"], shell=True)
+    subprocess.check_output(["sudo -u " + user + " makepkg -c"], shell=True)
     subprocess.check_output(["cd .."], shell=True)
     
     return subprocess.check_output(["ls *.pkg.tar.xz"], shell=True)
@@ -41,7 +41,8 @@ def main(args):
     
     #interface = "wlan0"
     interface = "wlp3s0"
-
+    user = "oracle"
+    
     try:
         subprocess.check_output(["ifconfig " + interface], shell=True)
         print(interface + " connectée !")
@@ -65,7 +66,7 @@ def main(args):
         #Sinon on télécharge et compile le dernier
         else:
             #Compilation du package
-            nom = buildPkg()
+            nom = buildPkg(user)
             #Installation du package
             installPkg(nom)
     else:

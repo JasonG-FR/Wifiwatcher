@@ -60,8 +60,8 @@ def installPkg(nomPkg):
     subprocess.check_output(["pacman -U " + nomPkg], shell=True)
 
 def buildPkg(user):
-    subprocess.check_output(["sudo -u " + user + " yaourt -G 8188eu-dkms"], shell=True)
-    subprocess.check_output(["cd 8188eu-dkms && sudo -u " + user + " makepkg -c"], shell=True)
+    subprocess.run(["sudo -u " + user + " yaourt -G 8188eu-dkms"], shell=True)
+    subprocess.run(["cd 8188eu-dkms && sudo -u " + user + " makepkg -c"], shell=True)
     
     return subprocess.check_output(["ls 8188eu-dkms/*.pkg.tar.xz"], shell=True).decode("utf8")
 

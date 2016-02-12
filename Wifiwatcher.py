@@ -23,6 +23,40 @@
 #  
 
 import subprocess
+import time
+
+def mettreAJour():
+    subprocess.check_output(["mkdir tmp"], shell=True)
+    subprocess.check_output(["cd tmp"], shell=True)
+    subprocess.check_output(["sudo -u " + user + " yaourt -G 8188eu-dkms"], shell=True)
+    subprocess.check_output(["cd .."], shell=True)
+    
+    PKGBUILD_local = open("8188eu-dkms/PKGBUILD","r")
+    PKGBUILD_internet = open("tmp/8188eu-dkms/PKGBUILD","r")
+    
+    data_local = PKGBUILD_local.readlines()
+    data_internet = PKGBUILD_internet.readlines()
+    
+    for ligne in data_local:
+        if "pkgver=" in ligne:
+            versionLocale = ligne
+    or ligne in data_internet:
+        if "pkgver=" in ligne:
+            versionInternet = ligne
+    
+    PKGBUILD_locale.close()
+    PKGBUILD_internet.close()
+    subprocess.check_output(["rm -r tmp"], shell=True)
+    
+    print("Version de 8188eu-dkms : [dépôt] " + versionInternet.replace("pkgver=","").replace("\n","") + " | [local] " + versionLocale.replace("pkgver=","").replace("\n",""))
+    if versionInternet == versionLocale:
+        print("Le package local est à jour!")
+        return False
+    else:
+        print("Le package local doit être mis à jour!")
+        return True
+    
+    
 
 def installPkg(nomPkg):
     subprocess.check_output(["pacman -U " + nomPkg], shell=True)
@@ -33,21 +67,31 @@ def buildPkg(user):
     subprocess.check_output(["sudo -u " + user + " makepkg -c"], shell=True)
     subprocess.check_output(["cd .."], shell=True)
     
-    return subprocess.check_output(["ls *.pkg.tar.xz"], shell=True)
+    return subprocess.check_output(["ls 8188eu-dkms/*.pkg.tar.xz"], shell=True).decode("utf8")
+
+def pkgExiste():
+    try:
+        subprocess.check_output(["ls 8188eu-dkms/"], shell=True)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
 
 def main(args):
     #Pour rappel, le script est lancé avec les droits root !
-    #On vérifie si la carte Wifi est reconnue
     
     #interface = "wlan0"
     interface = "wlp3s0"
     user = "oracle"
+    
+    #On vérifie qu'on est root
     
     whoami = subprocess.check_output(["whoami"], shell=True)
     if whoami != b'root':
         print("Wifiwatcher a besoin d'être lancé en tant que root ! (lancé avec "+ whoami.decode("utf8") +")")
         return 1
     
+    #On vérifie si la carte Wifi est reconnue
     try:
         subprocess.check_output(["ifconfig " + interface], shell=True)
         print(interface + " connectée !")
@@ -58,27 +102,50 @@ def main(args):
     
     if interface_OK:
         #Vérifier que le package existe
-        try:
-            subprocess.check_output(["ls 8188eu-dkms/"], shell=True)
-            existe = True
-        except subprocess.CalledProcessError:
-            existe = False
-            
-        if existe:
-            print(res)
+        if pkgExiste():
+            print("Il existe un package local, est-il à jour ?")
             #Vérifier qu'il est à jour
+            if mettreAJour():
+                #On sauvegarde l'ancien package (on sait jamais...)
+                subprocess.check_output(["mv 8188eu-dkms/ 8188eu-dkms-old/"], shell=True)
+                #Téléchargement et compilation du package
+                nom = buildPkg(user)
+                #Installation du package
+                installPkg(nom)
             
         #Sinon on télécharge et compile le dernier
         else:
-            #Compilation du package
+            #Téléchargement et compilation du package
             nom = buildPkg(user)
             #Installation du package
             installPkg(nom)
     else:
-        print("er")
-        #Installer le package disponible
-        #Redémarrer système
-    
+        if pkgExiste():
+            #Installer le package disponible
+            nom = subprocess.check_output(["ls *.pkg.tar.xz"], shell=True).decode("utf8")
+            installPkg(nom)
+            
+        else:
+            print("La carte Wifi est désactivée et aucun package de 8188eu-dkms disponible localement...")
+            #Pas de Wifi ni de package disponible, on peut rien faire... sauf si on a un accès Ethernet !
+            #Attente d'une connection Ethernet...
+            print("Attente d'une connection Ethernet...")
+            nonConnecte = True
+            while nonConnecte:
+                eth0 = subprocess.check_output(["ifconfig eth0"], shell=True).decode("utf8")
+                #Si eth0 à une IP, alors on est connecté
+                if "inet" in eth0:
+                    nonConnecte = False
+                time.sleep(5)
+            print("eth0 connectée !")
+            #Téléchargement et compilation du package
+            nom = buildPkg(user)
+            #Installation du package
+            installPkg(nom)
+            
+        #Redémarrer système dans 1 minute (pour pouvoir quitter le script et sauvegarder les logs!)
+        subprocess.check_output(["shutdown -r +1 'Redémarrage système imminent pour réactivation du Wifi...'"], shell=True)
+            
     return 0
 
 if __name__ == '__main__':

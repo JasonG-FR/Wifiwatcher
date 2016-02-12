@@ -43,6 +43,11 @@ def main(args):
     interface = "wlp3s0"
     user = "oracle"
     
+    whoami = subprocess.check_output(["whoami"], shell=True)
+    if whoami != b'root':
+        print("Wifiwatcher a besoin d'être lancé en tant que root ! (lancé avec "+ whoami.decode("utf8") +")")
+        return 1
+    
     try:
         subprocess.check_output(["ifconfig " + interface], shell=True)
         print(interface + " connectée !")

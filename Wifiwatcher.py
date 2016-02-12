@@ -74,7 +74,7 @@ def pkgExiste():
 def main(args):
     #Pour rappel, le script est lancé avec les droits root !
     
-    interface = "wlan0"
+    interface = "wlan1"
     user = "oracle"
     
     print("\n\t---- Wifiwatcher ----")

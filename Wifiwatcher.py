@@ -108,23 +108,20 @@ def main(args):
                 #Téléchargement et compilation du package
                 nom = buildPkg(user)
                 #Installation du package
-                """installPkg(nom)"""
-                print("s1")
+                installPkg(nom)
                             
         #Sinon on télécharge et compile le dernier
         else:
             #Téléchargement et compilation du package
             nom = buildPkg(user)
             #Installation du package
-            """installPkg(nom)"""
-            print("s2")
+            installPkg(nom)
 
     else:
         if pkgExiste():
             #Installer le package disponible
             nom = subprocess.check_output(["ls 8188eu-dkms/*.pkg.tar.xz"], shell=True).decode("utf8")
-            """installPkg(nom)"""
-            print("s3")
+            installPkg(nom)
             
         else:
             print("La carte Wifi est désactivée et aucun package de 8188eu-dkms disponible localement...")
@@ -142,11 +139,10 @@ def main(args):
             #Téléchargement et compilation du package
             nom = buildPkg(user)
             #Installation du package
-            """installPkg(nom)"""
-            print("s4")
+            installPkg(nom)
             
         #Redémarrer système dans 1 minute (pour pouvoir quitter le script et sauvegarder les logs!)
-        """subprocess.check_output(["shutdown -r +1 'Redémarrage système imminent pour réactivation du Wifi...'"], shell=True)"""
+        subprocess.run(["shutdown -r +1 'Redémarrage système imminent pour réactivation du Wifi...'"], shell=True)
         print("---- Reboot ----")
             
     return 0

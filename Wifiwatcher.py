@@ -126,7 +126,7 @@ def main(args):
             installPkg(nom)
             
         else:
-            print("La carte Wifi est désactivée et aucun package de 8188eu-dkms disponible localement...")
+            print("La carte Wifi est désactivée et aucun package de " + nomPkg + " disponible localement...")
             #Pas de Wifi ni de package disponible, on peut rien faire... sauf si on a un accès Ethernet !
             #Attente d'une connection Ethernet...
             print("Attente d'une connection Ethernet...")

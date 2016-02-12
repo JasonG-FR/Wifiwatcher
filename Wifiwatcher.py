@@ -41,8 +41,13 @@ def main(args):
     
     if interface_OK:
         #Vérifier que le package existe
-        res = subprocess.check_output(["ls pack/"], shell=True)
-        if res != b'':
+        try:
+            subprocess.check_output(["ls 8188eu-dkms/"], shell=True)
+            existe = True
+        except subprocess.CalledProcessError:
+            existe = False
+            
+        if existe:
             print(res)
             #Vérifier qu'il est à jour
             

@@ -55,7 +55,7 @@ def mettreAJour(user):
         return True
 
 def installPkg(nomPkg):
-    subprocess.check_output(["pacman -U --noconfirm" + nomPkg], shell=True)
+    subprocess.check_output(["pacman -U --noconfirm " + nomPkg], shell=True)
 
 def buildPkg(user):
     subprocess.run(["sudo -u " + user + " yaourt -G 8188eu-dkms"], shell=True)

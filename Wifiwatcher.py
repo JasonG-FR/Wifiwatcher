@@ -75,6 +75,7 @@ def main(args):
     #Pour rappel, le script est lancé avec les droits root !
     
     interface = "wlan0"
+    interface_secours = "eth0"
     user = "oracle"
     nomPkg = "8188eu-dkms"
     
@@ -131,12 +132,12 @@ def main(args):
             print("Attente d'une connection Ethernet...")
             nonConnecte = True
             while nonConnecte:
-                eth0 = subprocess.check_output(["ifconfig eth0"], shell=True).decode("utf8")
-                #Si eth0 à une IP, alors on est connecté
-                if "inet" in eth0:
+                if_sec = subprocess.check_output(["ifconfig " + interface_secours], shell=True).decode("utf8")
+                #Si interface_secours a une IP, alors on est connecté
+                if "inet" in if_sec:
                     nonConnecte = False
                 time.sleep(5)
-            print("eth0 connectée !")
+            print(interface_secours + " connectée !")
             #Téléchargement et compilation du package
             nom = buildPkg(user,nomPkg)
             #Installation du package

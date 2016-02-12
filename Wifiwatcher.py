@@ -84,6 +84,10 @@ def main(args):
     interface = "wlp3s0"
     user = "oracle"
     
+    print("\n\t---- Wifiwatcher ----")
+    #On affiche la date (logs)
+    subprocess.run(["date"], shell=True)
+    
     #On vérifie qu'on est root
     
     whoami = subprocess.check_output(["whoami"], shell=True)

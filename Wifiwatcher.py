@@ -74,7 +74,7 @@ def pkgExiste():
 def main(args):
     #Pour rappel, le script est lancé avec les droits root !
     
-    interface = "wlan1"
+    interface = "wlan0"
     user = "oracle"
     
     print("\n\t---- Wifiwatcher ----")
@@ -130,7 +130,7 @@ def main(args):
             print("Attente d'une connection Ethernet...")
             nonConnecte = True
             while nonConnecte:
-                eth0 = subprocess.check_output(["ifconfig wlan0"], shell=True).decode("utf8")
+                eth0 = subprocess.check_output(["ifconfig eth0"], shell=True).decode("utf8")
                 #Si eth0 à une IP, alors on est connecté
                 if "inet" in eth0:
                     nonConnecte = False

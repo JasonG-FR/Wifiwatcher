@@ -24,8 +24,14 @@
 
 import subprocess
 
+def buildPkg():
+    subprocess.check_output(["yaourt -G 8188eu-dkms"], shell=True)
+    subprocess.check_output(["cd 8188eu-dkms"], shell=True)
+    subprocess.check_output(["makepkg -c"], shell=True)
+    subprocess.check_output(["cd .."], shell=True)
+
 def main(args):
-    #Pour rappel, le script est lancé avec les droits root !
+    #Pour rappel, le script est lancé avec les droits root ?
     #On vérifie si la carte Wifi est reconnue
     
     #interface = "wlan0"
@@ -53,8 +59,10 @@ def main(args):
             
         #Sinon on télécharge et compile le dernier
         else:
-            #Récupération par Yaourt est stockage dans pack/
-            print("tmp")
+            #Compilation du package
+            buildPkg()
+            #Installation du package
+
     else:
         print("er")
         #Installer le package disponible

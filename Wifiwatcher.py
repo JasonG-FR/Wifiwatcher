@@ -26,8 +26,8 @@ import subprocess
 import time
 
 def mettreAJour(user):
-    subprocess.check_output(["sudo -u " + user + " mkdir tmp"], shell=True)
-    subprocess.check_output(["cd tmp && sudo -u " + user + " yaourt -G 8188eu-dkms"], shell=True)
+    subprocess.run(["sudo -u " + user + " mkdir tmp"], shell=True)
+    subprocess.run(["cd tmp && sudo -u " + user + " yaourt -G 8188eu-dkms"], shell=True)
     
     PKGBUILD_local = open("8188eu-dkms/PKGBUILD","r")
     PKGBUILD_internet = open("tmp/8188eu-dkms/PKGBUILD","r")
@@ -53,8 +53,6 @@ def mettreAJour(user):
     else:
         print("Le package local doit être mis à jour!")
         return True
-    
-    
 
 def installPkg(nomPkg):
     subprocess.check_output(["pacman -U " + nomPkg], shell=True)

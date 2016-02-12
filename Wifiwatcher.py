@@ -28,11 +28,12 @@ def main(args):
     #Pour rappel, le script est lancé avec les droits root !
     #On vérifie si la carte Wifi est reconnue
     
-    interface = "wlan0"
+    #interface = "wlan0"
+    interface = "wlp3s0"
 
     try:
         subprocess.check_output(["ifconfig " + interface], shell=True)
-        print(interface + "connectée !")
+        print(interface + " connectée !")
         interface_OK = True
     except subprocess.CalledProcessError:
         print(interface + " non connectée !")
@@ -40,9 +41,17 @@ def main(args):
     
     if interface_OK:
         #Vérifier que le package existe
-        
+        res = subprocess.check_output(["ls pack/"], shell=True)
+        if res != b'':
+            print(res)
             #Vérifier qu'il est à jour
+            
+        #Sinon on télécharge et compile le dernier
+        else:
+            #Récupération par Yaourt est stockage dans pack/
+            print("tmp")
     else:
+        print("er")
         #Installer le package disponible
         #Redémarrer système
     

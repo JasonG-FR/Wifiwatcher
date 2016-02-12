@@ -24,14 +24,19 @@
 
 import subprocess
 
+def installPkg(nomPkg):
+    subprocess.check_output(["pacman -U " + nomPkg], shell=True)
+
 def buildPkg():
-    subprocess.check_output(["yaourt -G 8188eu-dkms"], shell=True)
+    subprocess.check_output(["sudo -u oracle yaourt -G 8188eu-dkms"], shell=True)
     subprocess.check_output(["cd 8188eu-dkms"], shell=True)
-    subprocess.check_output(["makepkg -c"], shell=True)
+    subprocess.check_output(["sudo -u oracle makepkg -c"], shell=True)
     subprocess.check_output(["cd .."], shell=True)
+    
+    return subprocess.check_output(["ls *.pkg.tar.xz"], shell=True)
 
 def main(args):
-    #Pour rappel, le script est lancé avec les droits root ?
+    #Pour rappel, le script est lancé avec les droits root !
     #On vérifie si la carte Wifi est reconnue
     
     #interface = "wlan0"
@@ -60,9 +65,9 @@ def main(args):
         #Sinon on télécharge et compile le dernier
         else:
             #Compilation du package
-            buildPkg()
+            nom = buildPkg()
             #Installation du package
-
+            installPkg(nom)
     else:
         print("er")
         #Installer le package disponible

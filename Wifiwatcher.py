@@ -25,12 +25,12 @@
 import subprocess
 import time
 
-def mettreAJour(user):
+def mettreAJour(user,nomPkg):
     subprocess.run(["sudo -u " + user + " mkdir tmp"], shell=True)
-    subprocess.run(["cd tmp && sudo -u " + user + " yaourt -G 8188eu-dkms"], shell=True)
+    subprocess.run(["cd tmp && sudo -u " + user + " yaourt -G " + nomPkg], shell=True)
     
-    PKGBUILD_local = open("8188eu-dkms/PKGBUILD","r")
-    PKGBUILD_internet = open("tmp/8188eu-dkms/PKGBUILD","r")
+    PKGBUILD_local = open(nomPkg + "/PKGBUILD","r")
+    PKGBUILD_internet = open("tmp/" + nomPkg + "/PKGBUILD","r")
     
     data_local = PKGBUILD_local.readlines()
     data_internet = PKGBUILD_internet.readlines()
@@ -46,7 +46,7 @@ def mettreAJour(user):
     PKGBUILD_internet.close()
     subprocess.check_output(["rm -r tmp"], shell=True)
     
-    print("Version de 8188eu-dkms : [dépôt] " + versionInternet.replace("pkgver=","").replace("\n","") + " | [local] " + versionLocale.replace("pkgver=","").replace("\n",""))
+    print("Version de " + nomPkg + " : [dépôt] " + versionInternet.replace("pkgver=","").replace("\n","") + " | [local] " + versionLocale.replace("pkgver=","").replace("\n",""))
     if versionInternet == versionLocale:
         print("Le package local est à jour!")
         return False
@@ -57,15 +57,15 @@ def mettreAJour(user):
 def installPkg(nomPkg):
     subprocess.check_output(["pacman -U --noconfirm " + nomPkg], shell=True)
 
-def buildPkg(user):
-    subprocess.run(["sudo -u " + user + " yaourt -G 8188eu-dkms"], shell=True)
-    subprocess.run(["cd 8188eu-dkms && sudo -u " + user + " makepkg -c"], shell=True)
+def buildPkg(user,nomPkg):
+    subprocess.run(["sudo -u " + user + " yaourt -G " + nomPkg], shell=True)
+    subprocess.run(["cd " + nomPkg + " && sudo -u " + user + " makepkg -c"], shell=True)
     
-    return subprocess.check_output(["ls 8188eu-dkms/*.pkg.tar.xz"], shell=True).decode("utf8")
+    return subprocess.check_output(["ls " + nomPkg + "/*.pkg.tar.xz"], shell=True).decode("utf8")
 
-def pkgExiste():
+def pkgExiste(nomPkg):
     try:
-        subprocess.check_output(["ls 8188eu-dkms/*.pkg.tar.xz"], shell=True)
+        subprocess.check_output(["ls " + nomPkg + "/*.pkg.tar.xz"], shell=True)
         return True
     except subprocess.CalledProcessError:
         return False
@@ -76,6 +76,7 @@ def main(args):
     
     interface = "wlan0"
     user = "oracle"
+    nomPkg = "8188eu-dkms"
     
     print("\n\t---- Wifiwatcher ----")
     #On affiche la date (logs)
@@ -99,28 +100,28 @@ def main(args):
     
     if interface_OK:
         #Vérifier que le package existe (*.pkg.tar.xz)
-        if pkgExiste():
+        if pkgExiste(nomPkg):
             print("Il existe un package local, est-il à jour ?")
             #Vérifier qu'il est à jour
-            if mettreAJour(user):
+            if mettreAJour(user,nomPkg):
                 #On sauvegarde l'ancien package (on sait jamais...)
-                subprocess.check_output(["mv 8188eu-dkms/ 8188eu-dkms-old/"], shell=True)
+                subprocess.check_output(["mv " + nomPkg + "/ " + nomPkg + "-old/"], shell=True)
                 #Téléchargement et compilation du package
-                nom = buildPkg(user)
+                nom = buildPkg(user,nomPkg)
                 #Installation du package
                 installPkg(nom)
                             
         #Sinon on télécharge et compile le dernier
         else:
             #Téléchargement et compilation du package
-            nom = buildPkg(user)
+            nom = buildPkg(user,nomPkg)
             #Installation du package
             installPkg(nom)
 
     else:
-        if pkgExiste():
+        if pkgExiste(nomPkg):
             #Installer le package disponible
-            nom = subprocess.check_output(["ls 8188eu-dkms/*.pkg.tar.xz"], shell=True).decode("utf8")
+            nom = subprocess.check_output(["ls " + nomPkg + "/*.pkg.tar.xz"], shell=True).decode("utf8")
             installPkg(nom)
             
         else:
@@ -137,7 +138,7 @@ def main(args):
                 time.sleep(5)
             print("eth0 connectée !")
             #Téléchargement et compilation du package
-            nom = buildPkg(user)
+            nom = buildPkg(user,nomPkg)
             #Installation du package
             installPkg(nom)
             
